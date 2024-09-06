@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>jimtinney.me</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0a;
+            color: #00ff00;
+            overflow: hidden;
+            cursor: none;
+        }
+        #geometric-figure {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        .header {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3em;
+            color: #00ff00;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+            transition: text-shadow 0.1s;
+        }
+        .button-container {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+        }
+        .button {
+            padding: 10px 20px;
+            background-color: transparent;
+            border: 2px solid #00ff00;
+            color: #00ff00;
+            cursor: none;
+            transition: all 0.3s;
+        }
+        .button:hover {
+            background-color: #00ff00;
+            color: #0a0a0a;
+            text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 20px #00ff00;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.8);
+        }
+        .modal-content {
+            background-color: #0a0a0a;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #00ff00;
+            width: 80%;
+            max-width: 600px;
+        }
+        .close {
+            color: #00ff00;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: none;
+        }
+        .close:hover {
+            color: #fff;
+        }
+        
+        .cursor-trail {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background-color: #00ff00;
+            border-radius: 50%;
+            pointer-events: none;
+            opacity: 0.2;
+            transition: left 0.1s ease, top 0.1s ease;
+        }
+
+        .header:hover {
+            animation: glitch 0.3s linear infinite;
+        }
+
+        @keyframes glitch {
+            0% {
+                text-shadow: 0px 0px 5px rgba(0, 255, 0, 0.7), 3px 3px 5px rgba(255, 0, 0, 0.7);
+            }
+            33% {
+                text-shadow: 5px -5px 5px rgba(0, 255, 0, 0.7), -5px 5px 5px rgba(255, 0, 0, 0.7);
+            }
+            66% {
+                text-shadow: -5px 5px 5px rgba(0, 255, 0, 0.7), 5px -5px 5px rgba(255, 0, 0, 0.7);
+            }
+            100% {
+                text-shadow: 0px 0px 5px rgba(0, 255, 0, 0.7), 3px 3px 5px rgba(255, 0, 0, 0.7);
+            }
+        }
+        .header {
+            font-size: 3em;
+            color: #00ff00;
+            animation: fadeIn 2s ease-in-out;
+            transition: color 0.5s ease-in-out;
+        }
+
+        .header:hover {
+            color: #ff00ff;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .project-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+        }
+
+        .project-btn {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        .project-btn:hover {
+            background-color: #00ff00;
+            color: #0a0a0a;
+        }
+
+        .project-description {
+            margin-top: 30px;
+            color: #00ff00;
+            font-size: 14px;
+            text-align: center;
+        }
+        .project-links {
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-around;
+        }
+
+        .link-btn {
+            background-color: #0a0a0a;
+            color: #00ff00;
+            border: 2px solid #00ff00;
+            padding: 10px 20px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 14px;
+        }
+
+        .link-btn:hover {
+            background-color: #00ff00;
+            color: #0a0a0a;
+        }
+        
+    </style>
+</head>
+<body>
+    <div id="geometric-figure"></div>
+    <h1 class="header">10e</h1>
+    <div class="button-container">
+        <button class="button" onclick="openModal('about-modal')">About</button>
+        <button class="button" onclick="openModal('projects-modal')">Projects</button>
+    </div>
+
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('about-modal')">&times;</span>
+            <h2>About Me</h2>
+            <p id="about-text"></p>
+        </div>
+    </div>
+
+    <div id="projects-modal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('projects-modal')">&times;</span>
+            <h2>Projects</h2>
+    
+           <!-- Project Buttons -->
+        <div class="project-buttons">
+            <button id="sara-project" class="project-btn">The Sara Project</button>
+            <button id="the-agency" class="project-btn">The Agency</button>
+            <button id="geo-ai" class="project-btn">Geo-AI</button>
+        </div>
+
+        <!-- Project Description and Links -->
+        <div id="project-description" class="project-description">
+            <p>Select a project to see the details here.</p>
+           
+        </div>
+        <div id="project-links" class="project-links" style="display: none;">
+            <button id="demo-link" class="link-btn">Demo</button>
+            <button id="blog-link" class="link-btn">Blog</button>
+            <button id="github-link" class="link-btn">Github</button>
+        </div>
+    </div>
+</div>
+
+    <script>
+        // Three.js setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('geometric-figure').appendChild(renderer.domElement);
+
+        // Create a more complex geometric figure
+        const geometry = new THREE.IcosahedronGeometry(Math.min(window.innerWidth, window.innerHeight) / 400, 1);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
+        const mesh = new THREE.Mesh(geometry, material);
+        scene.add(mesh);
+
+        camera.position.z = 5;
+
+        // Mouse interaction
+        const raycaster = new THREE.Raycaster();
+        const mouse = new THREE.Vector2();
+
+        function onMouseMove(event) {
+            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+            raycaster.setFromCamera(mouse, camera);
+            const intersects = raycaster.intersectObject(mesh);
+
+            if (intersects.length > 0) {
+                const intersect = intersects[0];
+                const face = intersect.face;
+                const tempGeometry = new THREE.BufferGeometry().setFromPoints([
+                    face.a, face.b, face.c
+                ]);
+                tempGeometry.computeVertexNormals();
+                face.normal.negate();
+                tempGeometry.translate(face.normal.x * 0.1, face.normal.y * 0.1, face.normal.z * 0.1);
+            }
+        }
+        // Add this to your <script> section under the Three.js setup
+        let isDragging = false;
+        let previousMousePosition = {
+            x: 0,
+            y: 0
+        };
+
+        document.addEventListener('mousedown', function(e) {
+            isDragging = true;
+        });
+
+        document.addEventListener('mousemove', function(e) {
+            if (isDragging) {
+                const deltaX = e.clientX - previousMousePosition.x;
+                const deltaY = e.clientY - previousMousePosition.y;
+
+                mesh.rotation.y += deltaX * 0.01;
+                mesh.rotation.x += deltaY * 0.01;
+            }
+            previousMousePosition = {
+                x: e.clientX,
+                y: e.clientY
+            };
+        });
+
+        document.addEventListener('mouseup', function() {
+            isDragging = false;
+        });
+
+        document.addEventListener('click', () => {
+            // Determine the size based on the window dimensions or use a default value
+            const newSize = Math.min(window.innerWidth, window.innerHeight) / 400 || 1;
+
+            // Define different shapes for the user to click through
+            const shapes = [
+                new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1),
+                new THREE.BoxGeometry(newSize, newSize, newSize),
+                new THREE.SphereGeometry(newSize, 16, 16)
+            ];
+
+            // Randomly select one of the shapes
+            const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+
+            // Assign the new geometry to the mesh
+            mesh.geometry.dispose(); // Dispose the old geometry to avoid memory leaks
+            mesh.geometry = randomShape;
+        });
+
+        document.addEventListener('mousemove', onMouseMove, false);
+
+        // Animation
+        function animate() {
+            requestAnimationFrame(animate);
+            mesh.rotation.x += 0.005;
+            mesh.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        // Flickering header effect
+        const header = document.querySelector('.header');
+        setInterval(() => {
+            header.style.textShadow = Math.random() < 0.1 ? '0 0 10px #00ff00, 0 0 20px #00ff00, 0 0 30px #00ff00' : 'none';
+        }, 100);
+
+        // Modal functions
+        function openModal(modalId) {
+            document.getElementById(modalId).style.display = "block";
+            if (modalId === 'about-modal') {
+                typeWriter("After 15 years in law, I decided to shift focus to something that has always inspired me—leveraging the power of technology to expand creativity and explore new possibilities. My work in generative AI is now at the forefront, and this site is where I share the links to the ongoing projects that reflect this evolving journey.", 'about-text');
+            }
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = "none";
+        }
+
+        const modal = document.getElementById('projects-modal');
+        const closeBtn = document.querySelector('.close');
+
+        closeBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+
+        window.addEventListener('click', (event) => {
+            if (event.target == modal) {
+                modal.style.display = 'none';
+            }
+        });
+
+        // Close modal when clicking outside of it
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = "none";
+            }
+        }
+
+        // Projects modal
+        const projectLinks = document.getElementById('project-links');
+        const saraProjectBtn = document.getElementById('sara-project');
+        const agencyBtn = document.getElementById('the-agency');
+        const geoAiBtn = document.getElementById('geo-ai');
+        const projectDescription = document.getElementById('project-description');
+        const demoLink = document.getElementById('demo-link');
+        const blogLink = document.getElementById('blog-link');
+        const githubLink = document.getElementById('github-link');
+
+        saraProjectBtn.addEventListener('click', () => {
+            projectDescription.innerHTML = '<p>This is my AI.</p> <p>There are many like it, but this one is mine.</p>  <p>S.A.R.A. (Self-Improving Autonomous Reasoning Agent)</p>';
+            projectLinks.style.display = 'flex';
+
+            // Assign links for The Sara Project
+            demoLink.onclick = () => window.open('#', '_blank');
+            blogLink.onclick = () => window.open('#', '_blank');
+            githubLink.onclick = () => window.open('#', '_blank');
+        });
+
+        agencyBtn.addEventListener('click', () => {
+            projectDescription.innerHTML = '<p> An AI-driven narrative experience tailored to the expressed goals of the user.</p> <p>Welcome to the Agency.</p>';
+            projectLinks.style.display = 'flex';
+
+            // Assign links for The Agency
+            demoLink.onclick = () => window.open('#', '_blank');
+            blogLink.onclick = () => window.open('#', '_blank');
+            githubLink.onclick = () => window.open('#', '_blank');
+        });
+
+        geoAiBtn.addEventListener('click', () => {
+            projectDescription.innerHTML = '<p> An AI-driven narrative geo-caching experience.</p>';
+            projectLinks.style.display = 'flex';
+
+            // Assign links for Geo-AI
+            demoLink.onclick = () => window.open('#', '_blank');
+            blogLink.onclick = () => window.open('#', '_blank');
+            githubLink.onclick = () => window.open('#', '_blank');
+        });
+
+
+
+        // Static background color
+        document.body.style.backgroundColor = '#0a0a0a';
+
+        // Faster terminal-style typing effect
+        function typeWriter(text, elementId, speed = 8) {
+            let i = 0;
+            const element = document.getElementById(elementId);
+            element.innerHTML = '';
+            function type() {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                    setTimeout(type, speed);
+                }
+            }
+            type();
+        }
+
+        // Resize handler
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+
+            // Adjust size and complexity of geometry based on screen size
+            const newSize = Math.min(window.innerWidth, window.innerHeight) / 400;
+            mesh.geometry = new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1);
+        });
+        let trail = [];
+
+        function createTrail() {
+            const trailPart = document.createElement('div');
+            trailPart.className = 'cursor-trail';
+            document.body.appendChild(trailPart);
+            trail.push(trailPart);
+        }
+
+        for (let i = 0; i < 10; i++) {
+            createTrail();
+        }
+
+        document.addEventListener('mousemove', (e) => {
+            trail.forEach((t, index) => {
+                setTimeout(() => {
+                    t.style.left = e.clientX + 'px';
+                    t.style.top = e.clientY + 'px';
+                }, index * 50);
+            });
+        });
+        
+    </script>
+</body>
+</html>
