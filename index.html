@@ -209,7 +209,7 @@
                 width: 40px;
                 height: 40px;
                 border-radius: 50%;
-                background-color: black;
+                background-color: rgba(255, 255, 255, 0.5);
                 position: fixed;
                 pointer-events: none;
                 z-index: 9999;
@@ -366,44 +366,35 @@
         });
 
         let startX = 0, startY = 0, distX = 0, distY = 0, isSwiping = false;
-        const threshold = 30; // Minimum distance for a swipe gesture
-        const tapThreshold = 10; // Max distance for it to be considered a tap
+        const threshold = 30; // Minimum distance in pixels to detect a swipe
+        const tapThreshold = 10; // Maximum distance for it to be considered a tap
 
         // Detect touch start
         document.addEventListener('touchstart', function(event) {
             const touch = event.touches[0];
             startX = touch.clientX;
             startY = touch.clientY;
-            isSwiping = false;
-            touchIndicator.style.display = 'block';
-            touchIndicator.style.left = `${startX}px`;
-            touchIndicator.style.top = `${startY}px`;
+            isSwiping = false; // Reset swipe status
         }, false);
 
-        // Detect touch move (for swipe)
+        // Detect touch move (track swipe distance)
         document.addEventListener('touchmove', function(event) {
             if (event.touches.length > 0) {
                 const touch = event.touches[0];
                 distX = touch.clientX - startX;
                 distY = touch.clientY - startY;
 
-                // Update touch indicator position
-                touchIndicator.style.left = `${touch.clientX}px`;
-                touchIndicator.style.top = `${touch.clientY}px`;
-
-                // Check if the movement exceeds the swipe threshold
+                // If the distance exceeds the swipe threshold, mark as swiping
                 if (Math.abs(distX) > threshold || Math.abs(distY) > threshold) {
                     isSwiping = true;
                 }
             }
         }, false);
 
-        // Detect touch end (swipe and tap completion)
+        // Detect touch end (handle swipe or tap)
         document.addEventListener('touchend', function() {
-            touchIndicator.style.display = 'none';
-            
             if (isSwiping) {
-                // Determine the swipe direction
+                // Check if the swipe is more horizontal or vertical
                 if (Math.abs(distX) > Math.abs(distY)) {
                     // Horizontal swipe
                     if (distX > 0) {
@@ -436,11 +427,12 @@
                 mesh.geometry = randomShape;
             }
 
-            // Reset distances
+            // Reset swipe distances after touch ends
             distX = 0;
             distY = 0;
             isSwiping = false;
         }, false);
+
 
 
         // Animation
