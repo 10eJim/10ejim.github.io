@@ -186,10 +186,42 @@
                 flex-direction: column;
             }
         }
-        
+          /* Custom cursor for desktop */
+          @media (min-width: 1024px) {
+            body {
+                cursor: none;
+            }
+            #custom-cursor {
+                width: 20px;
+                height: 20px;
+                border-radius: 50%;
+                background-color: black;
+                position: fixed;
+                pointer-events: none;
+                z-index: 9999;
+                transform: translate(-50%, -50%);
+            }
+        }
+
+        /* Touch indicator for mobile */
+        @media (max-width: 1023px) {
+            #touch-indicator {
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                background-color: rgba(255, 255, 255, 0.5);
+                position: fixed;
+                pointer-events: none;
+                z-index: 9999;
+                display: none;
+                transform: translate(-50%, -50%);
+            }
+        }
     </style>
 </head>
 <body>
+    <div id="custom-cursor"></div>
+    <div id="touch-indicator"></div>
     <div id="geometric-figure"></div>
     <h1 class="header">10e</h1>
     <div class="button-container">
@@ -300,6 +332,39 @@
         });
 
         document.addEventListener('mousemove', onMouseMove, false);
+
+        // Variables for desktop cursor and mobile touch indicator
+        const customCursor = document.getElementById('custom-cursor');
+        const touchIndicator = document.getElementById('touch-indicator');
+
+        // Mouse move event for desktop
+        document.addEventListener('mousemove', (event) => {
+            customCursor.style.left = `${event.clientX}px`;
+            customCursor.style.top = `${event.clientY}px`;
+        });
+
+        // Touch events for mobile
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length > 0) {
+                touchIndicator.style.display = 'block';
+                const touch = event.touches[0];
+                touchIndicator.style.left = `${touch.clientX}px`;
+                touchIndicator.style.top = `${touch.clientY}px`;
+            }
+        });
+
+        document.addEventListener('touchmove', (event) => {
+            if (event.touches.length > 0) {
+                const touch = event.touches[0];
+                touchIndicator.style.left = `${touch.clientX}px`;
+                touchIndicator.style.top = `${touch.clientY}px`;
+            }
+        });
+
+        document.addEventListener('touchend', () => {
+            touchIndicator.style.display = 'none';
+        });
+
 
         // Animation
         function animate() {
