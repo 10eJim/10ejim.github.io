@@ -365,6 +365,83 @@
             touchIndicator.style.display = 'none';
         });
 
+        let startX = 0, startY = 0, distX = 0, distY = 0, isSwiping = false;
+        const threshold = 30; // Minimum distance for a swipe gesture
+        const tapThreshold = 10; // Max distance for it to be considered a tap
+
+        // Detect touch start
+        document.addEventListener('touchstart', function(event) {
+            const touch = event.touches[0];
+            startX = touch.clientX;
+            startY = touch.clientY;
+            isSwiping = false;
+            touchIndicator.style.display = 'block';
+            touchIndicator.style.left = `${startX}px`;
+            touchIndicator.style.top = `${startY}px`;
+        }, false);
+
+        // Detect touch move (for swipe)
+        document.addEventListener('touchmove', function(event) {
+            if (event.touches.length > 0) {
+                const touch = event.touches[0];
+                distX = touch.clientX - startX;
+                distY = touch.clientY - startY;
+
+                // Update touch indicator position
+                touchIndicator.style.left = `${touch.clientX}px`;
+                touchIndicator.style.top = `${touch.clientY}px`;
+
+                // Check if the movement exceeds the swipe threshold
+                if (Math.abs(distX) > threshold || Math.abs(distY) > threshold) {
+                    isSwiping = true;
+                }
+            }
+        }, false);
+
+        // Detect touch end (swipe and tap completion)
+        document.addEventListener('touchend', function() {
+            touchIndicator.style.display = 'none';
+            
+            if (isSwiping) {
+                // Determine the swipe direction
+                if (Math.abs(distX) > Math.abs(distY)) {
+                    // Horizontal swipe
+                    if (distX > 0) {
+                        // Swipe right
+                        mesh.rotation.y -= 0.1;  // Adjust rotation for swipe right
+                    } else {
+                        // Swipe left
+                        mesh.rotation.y += 0.1;  // Adjust rotation for swipe left
+                    }
+                } else {
+                    // Vertical swipe
+                    if (distY > 0) {
+                        // Swipe down
+                        mesh.rotation.x += 0.1;  // Adjust rotation for swipe down
+                    } else {
+                        // Swipe up
+                        mesh.rotation.x -= 0.1;  // Adjust rotation for swipe up
+                    }
+                }
+            } else if (Math.abs(distX) < tapThreshold && Math.abs(distY) < tapThreshold) {
+                // Handle tap (change object shape)
+                const newSize = Math.min(window.innerWidth, window.innerHeight) / 400 || 1;
+                const shapes = [
+                    new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1),
+                    new THREE.BoxGeometry(newSize, newSize, newSize),
+                    new THREE.SphereGeometry(newSize, 16, 16)
+                ];
+                const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
+                mesh.geometry.dispose();
+                mesh.geometry = randomShape;
+            }
+
+            // Reset distances
+            distX = 0;
+            distY = 0;
+            isSwiping = false;
+        }, false);
+
 
         // Animation
         function animate() {
