@@ -201,13 +201,13 @@
             <span class="close" onclick="closeModal('projects-modal')">&times;</span>
             <h2>Current Project</h2>
             <div id="project-description" class="project-description">
-                <p>"This is my AI. There are many like it, but this one is mine."</p> <p>  Work in progress that I will be sharing in the future. </p>
+                <p>"This is my AI. There are many like it, but this one is mine."</p> <p>  The projects that will be showcased here are still in development. As they take shape, this space will reflect the ideas and work I’m most excited to share. In the meantime, feel free to connect with me through the link below for more. </p>
             </div>
-            <!-- <div id="project-links" class="project-links">
-                <button id="demo-link" class="link-btn" onclick="window.open('#', '_blank')">linkedin</button>
-                <button id="blog-link" class="link-btn" onclick="window.open('#', '_blank')">insta</button>
-                <button id="github-link" class="link-btn" onclick="window.open('#', '_blank')">github</button>
-            </div> -->
+            <div id="project-links" class="project-links">
+                <!-- <button id="demo-link" class="link-btn" onclick="window.open('#', '_blank')">linkedin</button> -->
+                <button id="blog-link" class="link-btn" onclick="window.open('https://x.com/10eJim', '_blank')">twitter</button>
+                <!-- <button id="github-link" class="link-btn" onclick="window.open('#', '_blank')">github</button> -->
+            </div> 
         </div>
     </div>
 
@@ -329,7 +329,7 @@
         function openModal(modalId) {
             document.getElementById(modalId).style.display = "block";
             if (modalId === 'about-modal') {
-                typeWriter("After 15 years in law, I decided to shift focus to something that has always inspired me—leveraging the power of technology to expand creativity and explore new possibilities. My work in generative AI is now at the forefront, and this site is where I will be sharing the links to the ongoing projects that reflect this evolving journey.", 'about-text');
+                typeWriter("After a rewarding 15-year career in law, I’ve embraced a new path—combining my passion for technology with a focus on personal growth. My interest in coding and artificial intelligence is shaping a fresh direction, where I explore how these tools can drive creativity, innovation, and self-improvement.", 'about-text');
             }
         }
 
