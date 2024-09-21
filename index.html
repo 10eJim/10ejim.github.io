@@ -82,17 +82,6 @@
         .close:hover {
             color: #666666;
         }
-        
-        /* .cursor-trail {
-            position: fixed;
-            width: 10px;
-            height: 10px;
-            background-color: #000000;
-            border-radius: 50%;
-            pointer-events: none;
-            opacity: 0.2;
-            transition: left 0.1s ease, top 0.1s ease;
-        } */
 
         .header:hover {
             animation: glitch 0.3s linear infinite;
@@ -186,37 +175,7 @@
                 flex-direction: column;
             }
         }
-          /* Custom cursor for desktop
-          @media (min-width: 1024px) {
-            body {
-                cursor: none;
-            }
-            #custom-cursor {
-                width: 20px;
-                height: 20px;
-                border-radius: 50%;
-                background-color: black;
-                position: fixed;
-                pointer-events: none;
-                z-index: 9999;
-                transform: translate(-50%, -50%);
-            }
-        }
-
-        /* Touch indicator for mobile */
-        /* @media (max-width: 1023px) {
-            #touch-indicator {
-                width: 40px;
-                height: 40px;
-                border-radius: 50%;
-                background-color: rgba(255, 255, 255, 0.5);
-                position: fixed;
-                pointer-events: none;
-                z-index: 9999;
-                display: none;
-                transform: translate(-50%, -50%);
-            }
-        } */ 
+          
     </style>
 </head>
 <body>
@@ -405,28 +364,6 @@
             renderer.setSize(width, height);
         });
 
-        // Cursor trail
-        // let trail = [];
-
-        // function createTrail() {
-        //     const trailPart = document.createElement('div');
-        //     trailPart.className = 'cursor-trail';
-        //     document.body.appendChild(trailPart);
-        //     trail.push(trailPart);
-        // }
-
-        // for (let i = 0; i < 10; i++) {
-        //     createTrail();
-        // }
-
-        // document.addEventListener('mousemove', (e) => {
-        //     trail.forEach((t, index) => {
-        //         setTimeout(() => {
-        //             t.style.left = e.clientX + 'px';
-        //             t.style.top = e.clientY + 'px';
-        //         }, index * 50);
-        //     });
-        // });
     </script>
 </body>
 </html>
