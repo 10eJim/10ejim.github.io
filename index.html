@@ -13,7 +13,7 @@
             background-color: #ffffff;
             color: #000000;
             overflow: hidden;
-            cursor: none;
+            /* cursor: none; */
             touch-action: none;
         }
         #geometric-figure {
@@ -186,7 +186,7 @@
                 flex-direction: column;
             }
         }
-          /* Custom cursor for desktop */
+          /* Custom cursor for desktop
           @media (min-width: 1024px) {
             body {
                 cursor: none;
@@ -204,7 +204,7 @@
         }
 
         /* Touch indicator for mobile */
-        @media (max-width: 1023px) {
+        /* @media (max-width: 1023px) {
             #touch-indicator {
                 width: 40px;
                 height: 40px;
@@ -216,12 +216,12 @@
                 display: none;
                 transform: translate(-50%, -50%);
             }
-        }
+        } */ 
     </style>
 </head>
 <body>
-    <div id="custom-cursor"></div>
-    <div id="touch-indicator"></div>
+    <!-- <div id="custom-cursor"></div>
+    <div id="touch-indicator"></div> -->
     <div id="geometric-figure"></div>
     <h1 class="header">10e</h1>
     <div class="button-container">
@@ -253,7 +253,7 @@
     </div>
 
     <script>
-        // Three.js setup
+   // Three.js setup
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
         const renderer = new THREE.WebGLRenderer({ alpha: true });
@@ -268,61 +268,68 @@
 
         camera.position.z = 5;
 
-        // Mouse interaction
-        const raycaster = new THREE.Raycaster();
-        const mouse = new THREE.Vector2();
+        // Variables for rotation and interaction
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        let autoRotationX = 0;
+        let autoRotationY = 0;
+        const rotationSpeed = 0.002;
+        const autoRotationSpeed = 0.001;
+        const smoothingFactor = 0.1;
 
-        function onMouseMove(event) {
-            mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-            mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+        let isInteracting = false;
+        let lastMouseX = 0;
+        let lastMouseY = 0;
 
-            raycaster.setFromCamera(mouse, camera);
-            const intersects = raycaster.intersectObject(mesh);
-
-            if (intersects.length > 0) {
-                const intersect = intersects[0];
-                const face = intersect.face;
-                const tempGeometry = new THREE.BufferGeometry().setFromPoints([
-                    face.a, face.b, face.c
-                ]);
-                tempGeometry.computeVertexNormals();
-                face.normal.negate();
-                tempGeometry.translate(face.normal.x * 0.1, face.normal.y * 0.1, face.normal.z * 0.1);
-            }
+        // Function to handle both mouse and touch input
+        function handleInputStart(clientX, clientY) {
+            isInteracting = true;
+            lastMouseX = clientX;
+            lastMouseY = clientY;
         }
 
-        let isDragging = false;
-        let previousMousePosition = {
-            x: 0,
-            y: 0
-        };
+        function handleInputMove(clientX, clientY) {
+            if (!isInteracting) return;
 
-        document.addEventListener('mousedown', function(e) {
-            isDragging = true;
-        });
+            const deltaX = clientX - lastMouseX;
+            const deltaY = clientY - lastMouseY;
 
-        document.addEventListener('mousemove', function(e) {
-            if (isDragging) {
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
+            targetRotationY += deltaX * rotationSpeed;
+            targetRotationX += deltaY * rotationSpeed;
 
-                mesh.rotation.y += deltaX * 0.01;
-                mesh.rotation.x += deltaY * 0.01;
+            lastMouseX = clientX;
+            lastMouseY = clientY;
+        }
+
+        function handleInputEnd() {
+            isInteracting = false;
+        }
+
+        // Mouse events
+        document.addEventListener('mousedown', (event) => handleInputStart(event.clientX, event.clientY));
+        document.addEventListener('mousemove', (event) => handleInputMove(event.clientX, event.clientY));
+        document.addEventListener('mouseup', handleInputEnd);
+
+        // Touch events
+        document.addEventListener('touchstart', (event) => {
+            if (event.touches.length === 1) {
+                event.preventDefault();
+                handleInputStart(event.touches[0].clientX, event.touches[0].clientY);
             }
-            previousMousePosition = {
-                x: e.clientX,
-                y: e.clientY
-            };
         });
-
-        document.addEventListener('mouseup', function() {
-            isDragging = false;
+        document.addEventListener('touchmove', (event) => {
+            if (event.touches.length === 1) {
+                event.preventDefault();
+                handleInputMove(event.touches[0].clientX, event.touches[0].clientY);
+            }
         });
+        document.addEventListener('touchend', handleInputEnd);
 
+        // Click/tap to change shape
         document.addEventListener('click', () => {
-            const newSize = Math.min(window.innerWidth, window.innerHeight) / 400 || 1;
+            const newSize = Math.min(window.innerWidth, window.innerHeight) / 400;
             const shapes = [
-                new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1),
+                new THREE.IcosahedronGeometry(newSize, 1),
                 new THREE.BoxGeometry(newSize, newSize, newSize),
                 new THREE.SphereGeometry(newSize, 16, 16)
             ];
@@ -331,120 +338,21 @@
             mesh.geometry = randomShape;
         });
 
-        document.addEventListener('mousemove', onMouseMove, false);
-
-        // Variables for desktop cursor and mobile touch indicator
-        const customCursor = document.getElementById('custom-cursor');
-        const touchIndicator = document.getElementById('touch-indicator');
-
-        // Mouse move event for desktop
-        document.addEventListener('mousemove', (event) => {
-            customCursor.style.left = `${event.clientX}px`;
-            customCursor.style.top = `${event.clientY}px`;
-        });
-
-        // Touch events for mobile
-        document.addEventListener('touchstart', (event) => {
-            if (event.touches.length > 0) {
-                touchIndicator.style.display = 'block';
-                const touch = event.touches[0];
-                touchIndicator.style.left = `${touch.clientX}px`;
-                touchIndicator.style.top = `${touch.clientY}px`;
-            }
-        });
-
-        document.addEventListener('touchmove', (event) => {
-            if (event.touches.length > 0) {
-                const touch = event.touches[0];
-                touchIndicator.style.left = `${touch.clientX}px`;
-                touchIndicator.style.top = `${touch.clientY}px`;
-            }
-        });
-
-        document.addEventListener('touchend', () => {
-            touchIndicator.style.display = 'none';
-        });
-
-        let startX = 0, startY = 0, distX = 0, distY = 0, isSwiping = false;
-        const threshold = 30;  // Minimum distance to detect a swipe
-        const tapThreshold = 10;  // Max distance for it to be considered a tap
-        const rotationFactor = 0.005;  // Sensitivity factor for swipe
-        let targetRotationX = 0;
-        let targetRotationY = 0;
-        const smoothingFactor = 0.1;  // Lerp factor for smoother motion
-
-        let autoRotationX = 0;  // Keep track of auto-rotation separately
-        let autoRotationY = 0;
-
-        // Detect touch start
-        document.addEventListener('touchstart', function(event) {
-            const touch = event.touches[0];
-            startX = touch.clientX;
-            startY = touch.clientY;
-            isSwiping = false;
-        }, false);
-
-        // Detect touch move (track swipe distance)
-        document.addEventListener('touchmove', function(event) {
-            if (event.touches.length > 0) {
-                const touch = event.touches[0];
-                distX = touch.clientX - startX;
-                distY = touch.clientY - startY;
-
-                // If the movement exceeds the threshold, consider it a swipe
-                if (Math.abs(distX) > threshold || Math.abs(distY) > threshold) {
-                    isSwiping = true;
-                }
-            }
-        }, false);
-
-        // Detect touch end (handle swipe or tap)
-        document.addEventListener('touchend', function() {
-            if (isSwiping) {
-                // Check if it's a horizontal or vertical swipe
-                if (Math.abs(distX) > Math.abs(distY)) {
-                    // Horizontal swipe: Adjust the target rotation based on swipe distance
-                    targetRotationY += distX * rotationFactor;
-                } else {
-                    // Vertical swipe: Adjust the target rotation based on swipe distance
-                    targetRotationX += distY * rotationFactor;
-                }
-            } else if (Math.abs(distX) < tapThreshold && Math.abs(distY) < tapThreshold) {
-                // Handle tap (change object shape)
-                const newSize = Math.min(window.innerWidth, window.innerHeight) / 400 || 1;
-                const shapes = [
-                    new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1),
-                    new THREE.BoxGeometry(newSize, newSize, newSize),
-                    new THREE.SphereGeometry(newSize, 16, 16)
-                ];
-                const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
-                mesh.geometry.dispose();
-                mesh.geometry = randomShape;
-            }
-
-            // Reset swipe distances after touch ends
-            distX = 0;
-            distY = 0;
-            isSwiping = false;
-        }, false);
-
-        // Animation loop with smooth rotation interpolation (lerp) and auto-rotation
+        // Animation loop
         function animate() {
             requestAnimationFrame(animate);
 
-            // Auto-rotation (background continuous rotation)
-            autoRotationX += 0.005;  // You can adjust this value for speed
-            autoRotationY += 0.005;
+            // Apply auto-rotation
+            autoRotationX += autoRotationSpeed;
+            autoRotationY += autoRotationSpeed;
 
-            // Apply auto-rotation + swipe target rotation, but smooth the swipe interaction
-            mesh.rotation.x = autoRotationX + (targetRotationX - autoRotationX) * smoothingFactor;
-            mesh.rotation.y = autoRotationY + (targetRotationY - autoRotationY) * smoothingFactor;
+            // Smoothly interpolate between current rotation and target rotation
+            mesh.rotation.x += (targetRotationX + autoRotationX - mesh.rotation.x) * smoothingFactor;
+            mesh.rotation.y += (targetRotationY + autoRotationY - mesh.rotation.y) * smoothingFactor;
 
             renderer.render(scene, camera);
         }
         animate();
-
-
 
         // Flickering header effect
         const header = document.querySelector('.header');
@@ -486,14 +394,15 @@
             type();
         }
 
-        // Resize handler
+        // Handle window resizing
         window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+            
+            camera.aspect = width / height;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-
-            const newSize = Math.min(window.innerWidth, window.innerHeight) / 400;
-            mesh.geometry = new THREE.IcosahedronGeometry(newSize, newSize > 2 ? 2 : 1);
+            
+            renderer.setSize(width, height);
         });
 
         // Cursor trail
