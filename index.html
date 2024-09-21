@@ -287,15 +287,21 @@
         // Click/tap to change shape
         document.addEventListener('click', () => {
             const newSize = Math.min(window.innerWidth, window.innerHeight) / 400;
+
             const shapes = [
-                new THREE.IcosahedronGeometry(newSize, 1),
+                new THREE.IcosahedronGeometry(newSize, 0),
                 new THREE.BoxGeometry(newSize, newSize, newSize),
-                new THREE.SphereGeometry(newSize, 16, 16)
+                new THREE.SphereGeometry(newSize, 16, 16),
+                new THREE.DodecahedronGeometry(newSize, 0),
+                new THREE.OctahedronGeometry(newSize, 0),
+                new THREE.TetrahedronGeometry(newSize, 0),
             ];
+
             const randomShape = shapes[Math.floor(Math.random() * shapes.length)];
             mesh.geometry.dispose();
             mesh.geometry = randomShape;
         });
+
 
         // Animation loop
         function animate() {
