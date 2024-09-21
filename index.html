@@ -368,7 +368,13 @@
         let startX = 0, startY = 0, distX = 0, distY = 0, isSwiping = false;
         const threshold = 30;  // Minimum distance to detect a swipe
         const tapThreshold = 10;  // Max distance for it to be considered a tap
-        const rotationFactor = 0.005;  // Sensitivity factor for swipe (adjust as needed)
+        const rotationFactor = 0.005;  // Sensitivity factor for swipe
+        let targetRotationX = 0;
+        let targetRotationY = 0;
+        const smoothingFactor = 0.1;  // Lerp factor for smoother motion
+
+        let autoRotationX = 0;  // Keep track of auto-rotation separately
+        let autoRotationY = 0;
 
         // Detect touch start
         document.addEventListener('touchstart', function(event) {
@@ -397,11 +403,11 @@
             if (isSwiping) {
                 // Check if it's a horizontal or vertical swipe
                 if (Math.abs(distX) > Math.abs(distY)) {
-                    // Horizontal swipe
-                    mesh.rotation.y += distX * rotationFactor;  // Proportional to swipe distance
+                    // Horizontal swipe: Adjust the target rotation based on swipe distance
+                    targetRotationY += distX * rotationFactor;
                 } else {
-                    // Vertical swipe
-                    mesh.rotation.x += distY * rotationFactor;  // Proportional to swipe distance
+                    // Vertical swipe: Adjust the target rotation based on swipe distance
+                    targetRotationX += distY * rotationFactor;
                 }
             } else if (Math.abs(distX) < tapThreshold && Math.abs(distY) < tapThreshold) {
                 // Handle tap (change object shape)
@@ -422,17 +428,23 @@
             isSwiping = false;
         }, false);
 
-
-
-
-        // Animation
+        // Animation loop with smooth rotation interpolation (lerp) and auto-rotation
         function animate() {
             requestAnimationFrame(animate);
-            mesh.rotation.x += 0.005;
-            mesh.rotation.y += 0.005;
+
+            // Auto-rotation (background continuous rotation)
+            autoRotationX += 0.005;  // You can adjust this value for speed
+            autoRotationY += 0.005;
+
+            // Apply auto-rotation + swipe target rotation, but smooth the swipe interaction
+            mesh.rotation.x = autoRotationX + (targetRotationX - autoRotationX) * smoothingFactor;
+            mesh.rotation.y = autoRotationY + (targetRotationY - autoRotationY) * smoothingFactor;
+
             renderer.render(scene, camera);
         }
         animate();
+
+
 
         // Flickering header effect
         const header = document.querySelector('.header');
